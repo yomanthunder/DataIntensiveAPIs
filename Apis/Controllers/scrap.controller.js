@@ -38,6 +38,7 @@ async function fetchVideoId(genre,totalNoVideos){
             continue;
         }
     }
+    console.log('Data fetched successfully ')
     return videoIds;
 }
 //writing data to a csv file 
@@ -101,10 +102,16 @@ async function writeDataToCSV(req,res){
             console.log(`Failed to fetch Video data of ${i}th chunck data`);
             continue;// skip the data chunk and move on 
         }
-        write(videoData,{headers:!fileExists,includeEndRowDelimiter:true}) // Write headers only if the file doesn't exist
-            .pipe(stream)
-            .on('error', err => console.error(err))
-            .on('finish', () => console.log('Done writing.'));
+        console.log(`processing index ${i+1}`);
+        await new Promise((resolve, reject) => {
+            const csvStream = format({ headers: !fileExists && i === 0, includeEndRowDelimiter: true });
+            csvStream
+                .on('error', reject)
+                .on('end', resolve);
+            csvStream.pipe(stream, { end: false });
+            videoData.forEach((row) => csvStream.write(row));
+            csvStream.end();
+        });
      }
      stream.end(() => {
         res.status(200).send(`All data written to CSV`);
