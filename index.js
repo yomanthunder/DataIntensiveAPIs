@@ -12,7 +12,7 @@ app.get('/',(req,res)=>{
 });
 
 app.use('/scrap', router);
-console.log(`hello `);
+console.log('HELLO');
 app.listen(Port,()=>{
     console.log(`Running on port ${Port}`);
 })

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const {scrapController} = require('../Controllers/scrap.controller');
-router.get('/',scrapController);
+const {writeDataToCSV} = require('../Controllers/scrap.controller');
+
+router.get('/',writeDataToCSV);
+
 
 module.exports = {router};

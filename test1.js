@@ -10,7 +10,7 @@ const API_KEY = process.env.YOUTUBE_API_KEY;
 async function fetchVideoId(genre,totalNoVideos){
     let videoIds = [];
     let nextPageToken = '';
-    let retry_count = 0;
+    let failed_cnt = 0;
     while(videoIds.length<totalNoVideos){
         try{
             const searchResponse = await axios({
@@ -31,10 +31,8 @@ async function fetchVideoId(genre,totalNoVideos){
             if(!nextPageToken) break;
         }
         catch(error){
-            retry_count++;
-            if(retry_count>20){
-                return -1;
-            }
+            failed_cnt++;
+            console.log(`Failed to fetch Video Id${failed_cnt} Error ${error}`);
             continue;
         }
     }
@@ -85,9 +83,6 @@ async function fetchVideoData(videoIds,s,e){
 async function writeDataToCSV(req,res){
     let {genre,totalNoVideos} = req.query;
     let videoIds = await fetchVideoId(genre,totalNoVideos);
-    if(videoIds==-1){
-        return res.status(503).send(`Error fetching data from the server,may be the daily limit has reached`);
-    }
      const filePath = path.resolve(__dirname,'tmp.csv');
      const fileExists = fs.existsSync(filePath);
      const stream = fs.createWriteStream(filePath, { flags: 'a' });// flag used for appending data into the csv file 
